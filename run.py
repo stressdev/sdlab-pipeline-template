@@ -23,7 +23,6 @@ def main():
         default='/mnt/stressdevlab/scripts/Containers')
     parser.add_argument('--fmriprep_ver', help='fMRIprep container version', required=True)
     parser.add_argument('--xcpengine_ver', help='xcpengine container version', required=True)
-    parser.add_argument('--ants_path', help='ANTS path', required=True)
     parser.add_argument('--run', help='modules to run', nargs='+', 
         choices=['download', 'fmriprep', 'confounds', 'behavioral', 'xcpengine', 'model'],
         default=['download', 'fmriprep', 'confounds', 'behavioral', 'xcpengine', 'model']
@@ -40,7 +39,6 @@ def main():
     container_dir = get_container_dir(args.container_dir)
     fmriprep_version = get_fmriprep_ver(container_dir, args.fmriprep_ver)
     xcpengine_version = get_xcpengine_ver(container_dir, args.xcpengine_ver)
-    ants_path = get_ants_path(args.ants_path)
     modules = list(args.run)
 
     n = len(cbs_ids)
@@ -80,7 +78,7 @@ def main():
         if 'xcpengine' in modules:
             logger.info(f'Running xcpengine for subject {subject_cbs_id}')
             run_xcpengine(study_dir, subject_cbs_id, fmriprep_version, xcpengine_version, 
-                container_dir, ANTS_path)
+                container_dir)
 
 def get_study_dir(path):
     if not os.path.exists(path):
@@ -130,13 +128,6 @@ def get_xcpengine_ver(container_dir, xcpengine_ver):
 
     return xcpengine_ver
 
-def get_ants_path(ants_path):
-    if not os.path.exists(ants_path):
-        logger.critical(f'{ants_path} does not exist.')
-        raise
-
-    return ants_path
-
 def get_subject_bids_id(subject_cbs_id):
     try:
         s = subject_cbs_id.split('_')
@@ -180,8 +171,7 @@ def process_onsets(study_dir, subject_cbs_id):
     p.behavioral.carrit_onsets(study_dir, subject_bids_id)
     p.behavioral.wm_onsets(study_dir, subject_bids_id)
 
-def run_xcpengine(study_dir, subject_cbs_id, fmriprep_version, xcpengine_version, container_dir,
-    ANTS_path):
+def run_xcpengine(study_dir, subject_cbs_id, fmriprep_version, xcpengine_version, container_dir):
 
     subject_bids_id = get_subject_bids_id(subject_cbs_id)   
  
@@ -189,7 +179,7 @@ def run_xcpengine(study_dir, subject_cbs_id, fmriprep_version, xcpengine_version
     xcpengine_command = p.xcpengine.get_singularity_command(study_dir, subject_bids_id,
         xcpengine_version, fmriprep_version, container_dir)
     p.xcpengine.run_sbatch(study_dir, subject_bids_id, fmriprep_version, 
-        ANTS_path, xcpengine_command)
+        xcpengine_command)
 
 if __name__=='__init__':
     main()

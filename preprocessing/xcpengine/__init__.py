@@ -78,7 +78,7 @@ def get_singularity_command(study_dir, subject_bids_id,
 
     return ' '.join(cmd) 
 
-def run_sbatch(study_dir, subject_bids_id, fmriprep_version, ANTS_path, cmd):
+def run_sbatch(study_dir, subject_bids_id, fmriprep_version, cmd):
     try:
         sbatch_dir = get_sbatch_dir(study_dir, 'derivatives', 'sbatch', 'xcpengine')
         sbatch_file_path = os.path.join(sbatch_dir, subject_bids_id + '.sbatch')
@@ -93,7 +93,6 @@ def run_sbatch(study_dir, subject_bids_id, fmriprep_version, ANTS_path, cmd):
             f.writelines('#SBATCH --cpus-per-task=1\n')
             f.writelines('#SBATCH --mem-per-cpu=20G\n')
             f.writelines('#SBATCH --partition=ncf\n')
-            f.writelines('export ANTSPATH={}\n'.format(ANTS_path))
             f.writelines(cmd)
 
         os.system('sbatch {}'.format(sbatch_file_path))
